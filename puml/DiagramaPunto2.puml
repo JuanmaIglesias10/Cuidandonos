@@ -1,0 +1,143 @@
+@startuml
+
+Persona o-- Disponibilidad
+Persona *-- Domicilio
+Persona *-- Sexo
+
+Persona --> FormasDeReaccion
+AlertarACuidadores ..|> FormasDeReaccion
+AlertarAPolicia ..|> FormasDeReaccion
+LlamarAUsuario ..|> FormasDeReaccion
+FalsaAlarma ..|> FormasDeReaccion
+
+Notificador *-- TipoDeNotificacion
+NotificarComienzoDeCuidado ..|> TipoDeNotificacion
+NotificarFinDeCuidado ..|> TipoDeNotificacion
+NotificarSolicitudDeCuidado ..|> TipoDeNotificacion
+TipoDeNotificacion ..> Viaje
+
+
+Viaje --> "*" Persona
+Viaje "*" *-- Destino
+
+Persona ..> Viaje
+
+class Persona {
+    -nombre                     : String
+    -apellido                   : String
+    -Domicilio                  : Domicilio
+    -fechaDeNacimiento          : localDate
+    -sexo                       : Sexo
+    -puedeRecibirNotificaciones : Disponibilidad
+    -FormasDeReaccion           : List<FormasDeReaccion>
+
+    +cambiarReaccion(reaccion)
+    +viajar(Viaje viaje)
+}
+
+class Domicilio {
+    -calle        : String
+    -altura       : int
+    -piso         : int
+    -codigoPostal : Integer
+
+}
+
+class Disponibilidad {
+    -estaViajando : boolean
+}
+
+enum Sexo {
+    MASCULINO
+    FEMENINO
+    NOBINARIO
+}
+
+class Destino{
+ -latitud: String
+ -longitud: String
+ -cantidadMinutosADetenerse: Integer
+}
+
+class Viaje{
+    -transeunte: Persona
+    -cuidadores: List<Persona>
+    -destinoInicial: Destino
+    -destinoFinal: Destino
+    -tiempoDeDemoraAproximadoEnMinutosCalculado: Integer
+    -paradas : List<Destino>
+}
+
+interface FormasDeReaccion {
+    +reaccionar(Viaje)
+}
+
+class AlertarACuidadores {
+    +reaccionar(Viaje)
+}
+
+class AlertarAPolicia {
+    +reaccionar(Viaje)
+}
+
+class LlamarAUsuario {
+    +reaccionar(Viaje)
+}
+
+class FalsaAlarma {
+    +reaccionar(Viaje)
+}
+
+interface TipoDeNotificacion {
+    +notificarCuidadores(Viaje)
+}
+
+class Notificador {
+    -tipoDeNotificacion: TipoDeNotificacion
+    +notificarCuidadores(Viaje)
+}
+
+class NotificarSolicitudDeCuidado {
+    +notificarCuidadores(Viaje)
+}
+
+class NotificarComienzoDeCuidado {
+    +notificarCuidadores(Viaje)
+}
+
+class NotificarFinDeCuidado {
+    +notificarCuidadores(Viaje)
+}
+
+class CalculadoraDeTiempoDeDemora{
+    +calcularTiempoDeDemoraAproximadoEnMinutos(CalculadoraDeDistancia calculadoraDeDistancia, List<Paradas> paradas): Integer
+}
+
+interface AdapterDistancia{
+    +calcularDistanciaEnKMEntre(Destino destinoInicial, Destino destinoFinal): Double
+}
+
+class CalculadoraDeDistancia{
+    -adapterDistancia: AdapterDistancia
+    +calcularDistanciaEnKMEntre(Destino destinoInicial, Destino destinoFinal): Double
+}
+
+class AdapterDistanceMatrixAPI{
+    -distanceMatrixAPI: DistanceMatrixAPI
+    +calcularDistanciaEnKMEntre(Destino destinoInicial, Destino destinoFinal): Double
+}
+
+class DistanceMatrixAPI{
+    +calcularDistanciaEnKMEntre(Destino destinoInicial, Destino destinoFinal): Double
+}
+
+
+CalculadoraDeDistancia *-- AdapterDistancia
+AdapterDistancia <|.. AdapterDistanceMatrixAPI
+AdapterDistanceMatrixAPI *-- DistanceMatrixAPI
+
+
+CalculadoraDeTiempoDeDemora ..> Destino
+CalculadoraDeTiempoDeDemora ..> CalculadoraDeDistancia
+
+@enduml
